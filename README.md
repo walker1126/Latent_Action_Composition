@@ -26,8 +26,8 @@ Inference (action composition):
 python predict.py -n view --model_path ./model/pretrained_view.pth -v1 ./examples/walk.json -v2 ./examples/drink.json -h1 720 -w1 720 -h2 720 -w2 720 -o ./outputs/com-demo --max_length 60
 ```
 
-## Skeleton Contrastive Learning
-Comming soon
+## Skeleton Contrastive Learning & Action Segmentation
+Comming soon!
 
 
 ```bibtex
