@@ -15,16 +15,20 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-## Action Generator (for Action Composition)
+## Action Generator (for Skeleton Action Composition)
 
 Generator training (by motion retargeting):
 ```
-python train_generator.py -n view -g 01
+python train_generator.py -n view -g 0
 ```
 Inference (action composition):
 ```
 python predict.py -n view --model_path ./model/pretrained_view.pth -v1 ./examples/walk.json -v2 ./examples/drink.json -h1 720 -w1 720 -h2 720 -w2 720 -o ./outputs/com-demo --max_length 60
 ```
+
+## Skeleton Contrastive Learning
+Comming soon
+
 
 ```bibtex
 @InProceedings{Yang_2023_ICCV,
