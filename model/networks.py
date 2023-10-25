@@ -49,7 +49,6 @@ class Encoder(nn.Module):
             x = self.global_pool(x, ks)
             if self.compress:
                 x = self.conv1x1(x)
-        # new
         weight = self.v + 1e-8
         Q, R = torch.linalg.qr(weight)  # get eignvector, orthogonal [n1, n2, n3, n4]
         Q_m = Q[:, :128]
