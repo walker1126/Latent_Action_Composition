@@ -71,68 +71,6 @@ def handle2x(config, args):
     print("Done.")
 
 
-def handle3x(config, args):
-    # resize input
-    h1, w1, scale1 = pad_to_height(config.img_size[0], args.img1_height, args.img1_width)
-    h2, w2, scale2 = pad_to_height(config.img_size[0], args.img2_height, args.img2_width)
-    h3, w3, scale3 = pad_to_height(config.img_size[0], args.img2_height, args.img3_width)
-
-    # load trained model
-    net = get_autoencoder(config)
-    net.load_state_dict(torch.load(args.model_path))
-    net.to(config.device)
-    net.eval()
-
-    # mean/std pose
-    mean_pose, std_pose = get_meanpose(config)
-
-    # get input
-    input1 = lcrnet2motion(args.vid1_json_dir, scale=scale1, max_frame=args.max_length)
-    input2 = lcrnet2motion(args.vid2_json_dir, scale=scale2, max_frame=args.max_length)
-    input3 = lcrnet2motion(args.vid3_json_dir, scale=scale3, max_frame=args.max_length)
-    input1 = preprocess_motion2d(input1, mean_pose, std_pose)
-    input2 = preprocess_motion2d(input2, mean_pose, std_pose)
-    input3 = preprocess_motion2d(input3, mean_pose, std_pose)
-    input1 = input1.to(config.device)
-    input2 = input2.to(config.device)
-    input3 = input3.to(config.device)
-
-    # transfer by network
-    out = net.transfer_three(input1, input2, input3)
-
-    # postprocessing the outputs
-    input1 = postprocess_motion2d(input1, mean_pose, std_pose, w1 // 2, h1 // 2)
-    input2 = postprocess_motion2d(input2, mean_pose, std_pose, w2 // 2, h2 // 2)
-    input3 = postprocess_motion2d(input3, mean_pose, std_pose, w2 // 2, h2 // 2)
-    out = postprocess_motion2d(out, mean_pose, std_pose, w2 // 2, h2 // 2)
-
-    if not args.disable_smooth:
-        out = gaussian_filter1d(out, sigma=2, axis=-1)
-
-    if args.out_dir is not None:
-        save_dir = args.out_dir
-        ensure_dir(save_dir)
-        color1 = hex2rgb(args.color1)
-        color2 = hex2rgb(args.color2)
-        color3 = hex2rgb(args.color3)
-        np.savez(os.path.join(save_dir, 'results.npz'),
-                 input1=input1,
-                 input2=input2,
-                 input3=input3,
-                 out=out)
-        if args.render_video:
-            print("Generating videos...")
-            motion2video(input1, h1, w1, os.path.join(save_dir,'input1.mp4'), color1, args.transparency,
-                         fps=args.fps, save_frame=args.save_frame)
-            motion2video(input2, h2, w2, os.path.join(save_dir,'input2.mp4'), color2, args.transparency,
-                         fps=args.fps, save_frame=args.save_frame)
-            motion2video(input3, h3, w3, os.path.join(save_dir,'input3.mp4'), color3, args.transparency,
-                         fps=args.fps, save_frame=args.save_frame)
-            motion2video(out, h2, w2, os.path.join(save_dir,'out.mp4'), color2, args.transparency,
-                         fps=args.fps, save_frame=args.save_frame)
-
-    print("Done.")
-
 
 def main():
     parser = argparse.ArgumentParser()
